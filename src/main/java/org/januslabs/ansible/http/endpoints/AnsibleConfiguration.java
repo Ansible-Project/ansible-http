@@ -9,11 +9,6 @@ import lombok.Data;
 @Data
 @ConfigurationProperties("ansible")
 @Component
-/*ansible.basedir.location=/usr/local/bin
-ansible.playbook.cmd=ansible-playbook
-ansible.ping.playbook.name=hello.yml
-ansible.playbookdir.location=/Users/nandhuAEB
-*/
 public class AnsibleConfiguration {
 
   @Value("${ansible.basedir.location}")

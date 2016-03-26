@@ -35,7 +35,7 @@ public class AnsibleEndpoint {
 
     String processOutput = new ProcessExecutor(commands).readOutput(true).destroyOnExit().execute()
         .getOutput().getUTF8();
-    log.info("execution result {}  " , processOutput);
+    log.info("execution result {}  ", processOutput);
     return Response.ok().entity(processOutput).status(Status.OK).type(MediaType.TEXT_PLAIN_TYPE)
         .build();
 
