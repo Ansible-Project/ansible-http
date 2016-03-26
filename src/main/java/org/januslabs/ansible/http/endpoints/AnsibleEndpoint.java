@@ -44,8 +44,6 @@ public class AnsibleEndpoint {
     log.debug("execution status {}  ", status);
 
     return Response.ok().entity(status).status(Status.OK).type(MediaType.APPLICATION_JSON).build();
-
-
   }
 
 }
