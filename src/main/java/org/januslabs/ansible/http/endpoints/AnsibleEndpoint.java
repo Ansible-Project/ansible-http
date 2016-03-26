@@ -23,7 +23,7 @@ public class AnsibleEndpoint {
   private @Autowired AnsibleConfiguration ansibleConfig;
 
   @GET
-  @Produces(MediaType.TEXT_PLAIN)
+  @Produces(MediaType.APPLICATION_JSON)
   public Response executePingPlaybook() throws Exception {
     log.info("executing hello.yml ");
     List<String> commands = new ArrayList<String>();
@@ -31,13 +31,19 @@ public class AnsibleEndpoint {
         ansibleConfig.getAnsibleLocation() + File.separator + ansibleConfig.getPlaybookCommand());
     commands.add(
         ansibleConfig.getPlaybookLocation() + File.separator + ansibleConfig.getPingPlaybook());
-
-
     String processOutput = new ProcessExecutor(commands).readOutput(true).destroyOnExit().execute()
         .getOutput().getUTF8();
+
+    ExecutionStatus status = new ExecutionStatus();
+    if (processOutput != null && processOutput.contains("ERROR"))
+      status.setCode(-1);
+    else
+      status.setCode(0);
+    status.setOutput(processOutput);
     log.info("execution result {}  ", processOutput);
-    return Response.ok().entity(processOutput).status(Status.OK).type(MediaType.TEXT_PLAIN_TYPE)
-        .build();
+    log.debug("execution status {}  ", status);
+
+    return Response.ok().entity(status).status(Status.OK).type(MediaType.APPLICATION_JSON).build();
 
 
   }

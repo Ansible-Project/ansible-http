@@ -1,10 +1,8 @@
 package org.januslabs.ansible.http.config;
 
-import java.nio.charset.Charset;
 import java.util.Arrays;
 
-import javax.ws.rs.core.Response;
-
+import org.januslabs.ansible.http.endpoints.ExecutionStatus;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,7 +16,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.client.RestTemplate;
 
@@ -26,7 +23,7 @@ import org.springframework.web.client.RestTemplate;
 @SpringApplicationConfiguration(classes = AnsibleHttpApplication.class)
 @WebIntegrationTest(randomPort = true)
 public class AnsibleHttpApplicationTests {
-  
+
   @Value("${local.server.port}")
   private int port;
   @Value("${server.context-path}")
@@ -34,21 +31,20 @@ public class AnsibleHttpApplicationTests {
   @Value("${spring.jersey.application-path}")
   private String jerseycontextRoot;
   private RestTemplate restTemplate = new TestRestTemplate();
-	@Test
-	public void contextLoads() {
-	 
-	  restTemplate.getMessageConverters()
-      .add(new StringHttpMessageConverter(Charset.forName("UTF-8")));
-	  HttpHeaders headers = new HttpHeaders();
-      headers.setAccept(Arrays.asList(MediaType.TEXT_PLAIN));
-      
-      HttpEntity<String> entity = new HttpEntity<String>(headers);
-	  ResponseEntity<Response> response = restTemplate.exchange(
-          "http://localhost:" + this.port + this.contextRoot +  this.jerseycontextRoot +"/execute",HttpMethod.GET, entity,
-          Response.class);
-	  Assert.assertEquals( HttpStatus.OK,response.getStatusCode());
-	 
-	 
-	}
+
+  @Test
+  public void contextLoads() {
+    HttpHeaders headers = new HttpHeaders();
+    headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+
+    HttpEntity<String> entity = new HttpEntity<String>(headers);
+    ResponseEntity<ExecutionStatus> response = restTemplate.exchange(
+        "http://localhost:" + this.port + this.contextRoot + this.jerseycontextRoot + "/execute",
+        HttpMethod.GET, entity, ExecutionStatus.class);
+    Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
+    Assert.assertEquals(new Integer(0), response.getBody().getCode());
+    Assert.assertNotNull(response.getBody().getOutput());
+
+  }
 
 }
