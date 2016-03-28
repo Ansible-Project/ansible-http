@@ -46,4 +46,14 @@ public class AnsibleEndpoint {
     return Response.ok().entity(status).status(Status.OK).type(MediaType.APPLICATION_JSON).build();
   }
 
+  @Path("/hello")
+  @GET
+  @Produces(MediaType.TEXT_PLAIN)
+  public Response helloworld() throws Exception {
+    return Response.ok().entity("HelloWorld!!").status(Status.OK).type(MediaType.TEXT_PLAIN)
+        .build();
+
+  }
+
+
 }
