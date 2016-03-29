@@ -43,7 +43,7 @@ public class AnsibleHttpApplication {
         builder -> builder.setServerOption(UndertowOptions.ENABLE_HTTP2, true),
         builder -> builder.setServerOption(UndertowOptions.ENABLE_STATISTICS, true),
         builder -> builder.setServerOption(UndertowOptions.RECORD_REQUEST_START_TIME, true),
-        builder -> builder.addHttpListener(11080, "localhost"));
+        builder -> builder.addHttpListener(11081, "localhost"));
 
     return factory;
   }

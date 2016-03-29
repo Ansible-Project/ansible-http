@@ -69,7 +69,7 @@ public class AnsibleHttpApplicationTests {
 
     HttpEntity<String> entity = new HttpEntity<String>(headers);
     ResponseEntity<ExecutionStatus> response = restTemplate.exchange(
-        "http://localhost:" + 11080 + this.contextRoot + this.jerseycontextRoot + "/execute",
+        "http://localhost:" + 11081 + this.contextRoot + this.jerseycontextRoot + "/execute",
         HttpMethod.GET, entity, ExecutionStatus.class);
     Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
     Assert.assertEquals(new Integer(0), response.getBody().getCode());
