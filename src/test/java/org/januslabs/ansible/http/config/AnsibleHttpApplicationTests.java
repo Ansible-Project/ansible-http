@@ -2,6 +2,11 @@ package org.januslabs.ansible.http.config;
 
 import java.util.Arrays;
 
+import org.apache.http.client.HttpClient;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.ssl.SSLContextBuilder;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
+import org.apache.http.impl.client.HttpClients;
 import org.januslabs.ansible.http.endpoints.ExecutionStatus;
 import org.junit.Assert;
 import org.junit.Test;
@@ -16,6 +21,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.client.RestTemplate;
 
@@ -33,13 +39,37 @@ public class AnsibleHttpApplicationTests {
   private RestTemplate restTemplate = new TestRestTemplate();
 
   @Test
-  public void contextLoads() {
+  public void contextLoads() throws Exception{
+    SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(
+        new SSLContextBuilder().loadTrustMaterial(null, new TrustSelfSignedStrategy()).build());
+
+    HttpClient httpClient = HttpClients.custom().setSSLSocketFactory(socketFactory).build();
+
+
+    ((HttpComponentsClientHttpRequestFactory) restTemplate.getRequestFactory())
+        .setHttpClient(httpClient);
     HttpHeaders headers = new HttpHeaders();
     headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
 
     HttpEntity<String> entity = new HttpEntity<String>(headers);
     ResponseEntity<ExecutionStatus> response = restTemplate.exchange(
-        "http://localhost:" + this.port + this.contextRoot + this.jerseycontextRoot + "/execute",
+        "https://localhost:" + this.port + this.contextRoot + this.jerseycontextRoot + "/execute",
+        HttpMethod.GET, entity, ExecutionStatus.class);
+    Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
+    Assert.assertEquals(new Integer(0), response.getBody().getCode());
+    Assert.assertNotNull(response.getBody().getOutput());
+
+  }
+  
+  @Test
+  public void contextLoadsNonSSL() throws Exception{
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+
+    HttpEntity<String> entity = new HttpEntity<String>(headers);
+    ResponseEntity<ExecutionStatus> response = restTemplate.exchange(
+        "http://localhost:" + 11080 + this.contextRoot + this.jerseycontextRoot + "/execute",
         HttpMethod.GET, entity, ExecutionStatus.class);
     Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
     Assert.assertEquals(new Integer(0), response.getBody().getCode());
