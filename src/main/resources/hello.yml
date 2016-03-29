@@ -1,0 +1,7 @@
+-  hosts: localhost
+   tasks:
+     - name: hello {{ inventory_hostname }}
+       command: hostname
+       register: hostname
+
+     - debug: var=hostname
