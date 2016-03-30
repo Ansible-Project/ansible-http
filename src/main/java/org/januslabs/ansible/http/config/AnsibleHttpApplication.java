@@ -25,12 +25,13 @@ public class AnsibleHttpApplication {
   public EmbeddedServletContainerFactory embeddedServletContainerFactory() {
 
     UndertowEmbeddedServletContainerFactory factory = new UndertowEmbeddedServletContainerFactory();
-    factory.addBuilderCustomizers(
-        builder -> builder.setServerOption(UndertowOptions.ENABLE_HTTP2, Boolean.TRUE),
-        builder -> builder.setServerOption(UndertowOptions.ENABLE_SPDY, Boolean.TRUE),
-        builder -> builder.setServerOption(UndertowOptions.ENABLE_STATISTICS, Boolean.TRUE),
-        builder -> builder.setServerOption(UndertowOptions.RECORD_REQUEST_START_TIME, Boolean.TRUE),
-        builder -> builder.addHttpListener(11081, "localhost"));
+    factory.addBuilderCustomizers(builder -> {
+      builder.setServerOption(UndertowOptions.ENABLE_HTTP2, Boolean.TRUE);
+      builder.setServerOption(UndertowOptions.ENABLE_SPDY, Boolean.TRUE);
+      builder.setServerOption(UndertowOptions.ENABLE_STATISTICS, Boolean.TRUE);
+      builder.setServerOption(UndertowOptions.RECORD_REQUEST_START_TIME, Boolean.TRUE);
+      builder.addHttpListener(11081, "localhost");
+    });
     return factory;
   }
 }
