@@ -6,7 +6,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerFactory;
 import org.springframework.boot.context.embedded.undertow.UndertowEmbeddedServletContainerFactory;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.DependsOn;
 
 import io.undertow.UndertowOptions;
 
@@ -22,30 +21,16 @@ public class AnsibleHttpApplication {
     return new AnsibleConfiguration();
   }
 
-  /*
-      
-   */
   @Bean
-  @DependsOn(value="ansibleConfiguration")
   public EmbeddedServletContainerFactory embeddedServletContainerFactory() {
-   
+
     UndertowEmbeddedServletContainerFactory factory = new UndertowEmbeddedServletContainerFactory();
-   /* factory.setAccessLogDirectory(new File("."));
-    factory.setAccessLogEnabled(true);
-    factory.setAccessLogPattern(
-        "%I %q %m %h %a %l %u %t \"%r\" %s %b (%D ms) %U \"%{i,Referer}\" \"%{i,Host}\" \"%{i,User-Agent}\" \"%{o,Content-Type}\" \"%{o,Content-Length}\"");
-    factory.setBufferSize(16000);
-    factory.setBuffersPerRegion(20);
-    factory.setDirectBuffers(true);
-    factory.setIoThreads(10);
-    factory.setWorkerThreads(100);*/
     factory.addBuilderCustomizers(
         builder -> builder.setServerOption(UndertowOptions.ENABLE_HTTP2, Boolean.TRUE),
         builder -> builder.setServerOption(UndertowOptions.ENABLE_SPDY, Boolean.TRUE),
         builder -> builder.setServerOption(UndertowOptions.ENABLE_STATISTICS, Boolean.TRUE),
         builder -> builder.setServerOption(UndertowOptions.RECORD_REQUEST_START_TIME, Boolean.TRUE),
         builder -> builder.addHttpListener(11081, "localhost"));
-
     return factory;
   }
 }
