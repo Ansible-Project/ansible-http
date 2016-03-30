@@ -4,9 +4,9 @@ import java.util.Arrays;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.januslabs.ansible.http.endpoints.ExecutionStatus;
 import org.junit.Assert;
 import org.junit.Test;
@@ -38,8 +38,10 @@ public class AnsibleHttpApplicationTests {
   private String jerseycontextRoot;
   private RestTemplate restTemplate = new TestRestTemplate();
 
+
   @Test
   public void contextLoads() throws Exception{
+   
     SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(
         new SSLContextBuilder().loadTrustMaterial(null, new TrustSelfSignedStrategy()).build());
 

@@ -32,6 +32,14 @@
 		level="info" additivity="false">
 		<appender-ref ref="ASYNC" />
 	</logger>
+	<logger name="io.undertow"
+		level="debug" additivity="false">
+		<appender-ref ref="ASYNC" />
+	</logger>
+	<logger name="org.glassfish.jersey"
+	level="debug" additivity="false">
+		<appender-ref ref="ASYNC" />
+	</logger>
 	<root level="WARN">
 		<appender-ref ref="ASYNC" />
 	</root>

@@ -40,9 +40,10 @@ public class AnsibleHttpApplication {
     factory.setIoThreads(10);
     factory.setWorkerThreads(100);*/
     factory.addBuilderCustomizers(
-        builder -> builder.setServerOption(UndertowOptions.ENABLE_HTTP2, true),
-        builder -> builder.setServerOption(UndertowOptions.ENABLE_STATISTICS, true),
-        builder -> builder.setServerOption(UndertowOptions.RECORD_REQUEST_START_TIME, true),
+        builder -> builder.setServerOption(UndertowOptions.ENABLE_HTTP2, Boolean.TRUE),
+        builder -> builder.setServerOption(UndertowOptions.ENABLE_SPDY, Boolean.TRUE),
+        builder -> builder.setServerOption(UndertowOptions.ENABLE_STATISTICS, Boolean.TRUE),
+        builder -> builder.setServerOption(UndertowOptions.RECORD_REQUEST_START_TIME, Boolean.TRUE),
         builder -> builder.addHttpListener(11081, "localhost"));
 
     return factory;
