@@ -1,5 +1,6 @@
 package org.januslabs.ansible.http.config;
 
+import org.eclipse.jetty.alpn.ALPN;
 import org.januslabs.ansible.http.endpoints.AnsibleConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -13,6 +14,7 @@ import io.undertow.UndertowOptions;
 public class AnsibleHttpApplication {
 
   public static void main(String[] args) {
+    ALPN.debug = true;
     SpringApplication.run(AnsibleHttpApplication.class, args);
   }
 

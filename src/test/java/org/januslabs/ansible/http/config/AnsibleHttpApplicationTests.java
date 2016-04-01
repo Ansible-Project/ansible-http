@@ -1,6 +1,7 @@
 package org.januslabs.ansible.http.config;
 
 import java.util.Arrays;
+import java.util.HashMap;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -40,8 +41,8 @@ public class AnsibleHttpApplicationTests {
 
 
   @Test
-  public void contextLoads() throws Exception{
-   
+  public void contextLoads() throws Exception {
+
     SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(
         new SSLContextBuilder().loadTrustMaterial(null, new TrustSelfSignedStrategy()).build());
 
@@ -62,9 +63,9 @@ public class AnsibleHttpApplicationTests {
     Assert.assertNotNull(response.getBody().getOutput());
 
   }
-  
+
   @Test
-  public void contextLoadsNonSSL() throws Exception{
+  public void contextLoadsNonSSL() throws Exception {
 
     HttpHeaders headers = new HttpHeaders();
     headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
@@ -76,6 +77,37 @@ public class AnsibleHttpApplicationTests {
     Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
     Assert.assertEquals(new Integer(0), response.getBody().getCode());
     Assert.assertNotNull(response.getBody().getOutput());
+
+  }
+
+  @Test
+  public void executeCommands() throws Exception {
+    SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(
+        new SSLContextBuilder().loadTrustMaterial(null, new TrustSelfSignedStrategy()).build());
+
+    HttpClient httpClient = HttpClients.custom().setSSLSocketFactory(socketFactory).build();
+
+
+    ((HttpComponentsClientHttpRequestFactory) restTemplate.getRequestFactory())
+        .setHttpClient(httpClient);
+    HttpHeaders headers = new HttpHeaders();
+    headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+    // headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+    HashMap<String, String> postParameters = new HashMap<String, String>();
+    postParameters.put("field 1", "value 1");
+    postParameters.put("field 2", "value 2");
+    postParameters.put("field 2", "value 3");
+    HttpEntity<HashMap<String, String>> requestEntity =
+        new HttpEntity<HashMap<String, String>>(headers);
+
+
+    ResponseEntity<ExecutionStatus> response =
+        restTemplate.exchange(
+            "https://localhost:" + this.port + this.contextRoot + this.jerseycontextRoot
+                + "/execute" + "?key=",
+            HttpMethod.POST, requestEntity, ExecutionStatus.class);
+    Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
+
 
   }
 

@@ -19,4 +19,8 @@ public class AnsibleConfiguration {
   private String pingPlaybook;
   @Value("${ansible.playbook.cmd}")
   private String playbookCommand;
+  @Value("${ansible.inventory.name}")
+  private String inventoryName;
+  @Value("${ansible.adhoc.cmd}")
+  private String adhocName;
 }

@@ -5,8 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -29,8 +31,12 @@ public class AnsibleEndpoint {
     List<String> commands = new ArrayList<String>();
     commands.add(
         ansibleConfig.getAnsibleLocation() + File.separator + ansibleConfig.getPlaybookCommand());
+    commands.add("-i");
+    commands.add(
+        ansibleConfig.getPlaybookLocation() + File.separator + ansibleConfig.getInventoryName());
     commands.add(
         ansibleConfig.getPlaybookLocation() + File.separator + ansibleConfig.getPingPlaybook());
+    log.info("executing  commands {} ", commands);
     String processOutput = new ProcessExecutor(commands).readOutput(true).destroyOnExit().execute()
         .getOutput().getUTF8();
 
@@ -54,6 +60,72 @@ public class AnsibleEndpoint {
         .build();
 
   }
+
+  @POST
+  @Produces(MediaType.APPLICATION_JSON)
+  /*
+   * samples commands ansible -i hosts.stage aebbackend -m service -a
+   * "name=tcat-aebedx state=restarted" --user=username --extra-vars
+   * "ansible_sudo_pass=yourPassword" /usr/nano/local/bin/ansible -vvvv -i
+   * /usr/nano/build/stash/ansible-playbook/hosts.stage aebbackend -m service -a
+   * "name=tcat-aebedx state=restarted"
+   *
+   * ansible-playbook -i hosts.stage upgrade_war.yml --ask-become-pass ansible all -m ping -u bruce
+   * -b
+   * 
+   * @n$ible. /usr/nano/local/bin/ansible -vvvv -i
+   * /usr/nano/build/stash/ansible-playbook/hosts.stage aebbackend -a "whoami"
+   * /usr/nano/local/bin/ansible -i /usr/nano/build/stash/ansible-playbook/hosts.stage aebbackend -m
+   * command -a "/etc/init.d/tcat-aebedx status" --ask-become-pass --become
+   * 
+   */
+  public Response executeCommands(@QueryParam("key") String key) throws Exception {
+    log.info("invoking adhoc command for key {} ", key);
+    List<String> commands = new ArrayList<String>();
+    commands.add(ansibleConfig.getAnsibleLocation() + File.separator +ansibleConfig.getAdhocName());
+    commands.add("-i");
+    commands.add(
+        ansibleConfig.getPlaybookLocation() + File.separator + ansibleConfig.getInventoryName());
+    commands.add("aebbackend");
+    commands.add("-a");
+    switch (key.toUpperCase()) {
+      case "STATUS":
+        commands.add("/etc/init.d/tcat-aebedx status");
+        commands.add("-m");
+        commands.add("command");
+        break;
+      case "DEPLOY":
+        commands.add("/etc/init.d/tcat-aebedx status");
+        commands.add("-m");
+        commands.add("command");
+        break;
+      case "BOUNCE":
+        commands.add("name=tcat-aebedx state=restarted");
+        commands.add("-m");
+        commands.add("service");
+      break;
+      default:
+        break;
+    }
+    
+    commands.add("-vvvv");
+    commands.add("--become");
+    log.info("executing adhoc commands {} ", commands);
+    String processOutput = new ProcessExecutor(commands).readOutput(true).destroyOnExit().execute()
+        .getOutput().getUTF8();
+
+    ExecutionStatus status = new ExecutionStatus();
+    if (processOutput != null && processOutput.contains("ERROR"))
+      status.setCode(-1);
+    else
+      status.setCode(0);
+    status.setOutput(processOutput);
+    log.info("execution result {}  ", processOutput);
+    log.debug("execution status {}  ", status);
+
+    return Response.ok().entity(status).status(Status.OK).type(MediaType.APPLICATION_JSON).build();
+  }
+
 
 
 }

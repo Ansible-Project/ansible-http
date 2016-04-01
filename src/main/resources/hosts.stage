@@ -1,0 +1,49 @@
+[consulagents]
+msp0lmngm[001:003].etdbw.com
+msp0ltcsi015.etdbw.com
+
+[aebbackend]
+msp0ltcsi015.etdbw.com
+
+[consulservers]
+msp0lnanm[001:003].etdbw.com
+
+[consultemplate]
+msp0lnanm001.etdbw.com
+msp0lnanm002.etdbw.com
+msp0lmngm[001:003].etdbw.com
+msp0ltcsi015.etdbw.com
+
+[consului]
+msp0lnanm002.etdbw.com
+
+[kibanaui]
+msp0lnanm002.etdbw.com
+
+[dbservers]
+msp0lmngm001.etdbw.com mongo_role=primary
+msp0lmngm002.etdbw.com mongo_role=secondary
+msp0lmngm003.etdbw.com mongo_role=secondary
+
+[elasticsearch]
+msp0lnanm001.etdbw.com
+msp0lnanm002.etdbw.com
+
+[logstash]
+msp0lnanm001.etdbw.com host_ip=10.80.129.200
+
+[webservers]
+#msp0lnanm002.etdbw.com
+msp0ltcsi015.etdbw.com
+
+[appservers]
+msp0lnanm001.etdbw.com
+
+[stage:children]
+consulagents
+consulservers
+dbservers
+elasticsearch
+logstash
+webservers
+aebbackend
