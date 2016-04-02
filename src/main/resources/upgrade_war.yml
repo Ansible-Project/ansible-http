@@ -1,0 +1,38 @@
+---
+# This Playbook deploys the consul componets for consul server,
+#   consul agent, and consul-template
+#   consului is deployed with the webservers group
+#
+- hosts: aebbackend
+  become: yes
+
+  vars_prompt:
+    - name: "name"
+      prompt: "war to deploy?"
+      private: no
+
+    - name: "version"
+      prompt: "Version to deploy?"
+      private: no
+
+    - name: "groupid"
+      prompt: "Artifactory group id?"
+      private: no
+
+    - name: "tcat_cluster_name"
+      prompt: "Tomcat instance name?"
+      private: no
+
+  tasks:
+    - name: download application war files from artifactory
+      command: "/usr/bin/curl http://localhost:8090/artifactoryservices/artifactory/downloadArtifact/com.assurant.inc.{{ groupid }}:{{ name }}:{{ version }}"
+      run_once: true
+      delegate_to: 127.0.0.1
+
+    - name: copy war files to distribution directory
+      command: "mv /tmp/{{ name }}.war /usr/nano/build/{{ ansible_environment }}/tomcat/{{ name }}-{{ version }}.war"
+      run_once: true
+      delegate_to: 127.0.0.1
+    
+    - name: Copy tomcat instance application war files
+      copy: src="/usr/nano/build/{{ ansible_environment }}/tomcat/{{ name }}-{{ version }}.war" dest="{{ tcat_base }}/{{ tcat_app_base }}/{{ breakfix_environment }}{{ name }}.war" owner="tomcat" group="webserver"

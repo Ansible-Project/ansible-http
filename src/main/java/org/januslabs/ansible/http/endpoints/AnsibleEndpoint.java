@@ -8,10 +8,12 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.zeroturnaround.exec.ProcessExecutor;
@@ -79,7 +81,15 @@ public class AnsibleEndpoint {
    * command -a "/etc/init.d/tcat-aebedx status" --ask-become-pass --become
    * 
    */
-  public Response executeCommands(@QueryParam("key") String key) throws Exception {
+  public Response executeCommands(@Context UriInfo uriInfo) throws Exception {
+    String key="STATUS";
+    String groupId, version, name,clusterName;
+    MultivaluedMap<String, String> queryParams=   uriInfo.getQueryParameters();
+    key=queryParams.getFirst("key");
+    groupId=queryParams.getFirst("groupId");
+    version=queryParams.getFirst("version");
+    name=queryParams.getFirst("name");
+    clusterName=queryParams.getFirst("clusterName");
     log.info("invoking adhoc command for key {} ", key);
     List<String> commands = new ArrayList<String>();
     commands.add(ansibleConfig.getAnsibleLocation() + File.separator +ansibleConfig.getAdhocName());
@@ -95,10 +105,7 @@ public class AnsibleEndpoint {
         commands.add("command");
         break;
       case "DEPLOY":
-        commands.add("/etc/init.d/tcat-aebedx status");
-        commands.add("-m");
-        commands.add("command");
-        break;
+        return executeDeployPlaybook(groupId,name,version,clusterName);
       case "BOUNCE":
         commands.add("name=tcat-aebedx state=restarted");
         commands.add("-m");
@@ -124,6 +131,40 @@ public class AnsibleEndpoint {
     log.debug("execution status {}  ", status);
 
     return Response.ok().entity(status).status(Status.OK).type(MediaType.APPLICATION_JSON).build();
+  }
+
+  private Response executeDeployPlaybook(String groupId, String name, String version,
+      String clusterName) throws Exception{
+    log.info("executing upgrade_war.yml ");
+    List<String> commands = new ArrayList<String>();
+    commands.add(
+        ansibleConfig.getAnsibleLocation() + File.separator + ansibleConfig.getPlaybookCommand());
+    commands.add("-i");
+    commands.add(
+        ansibleConfig.getPlaybookLocation() + File.separator + ansibleConfig.getInventoryName());
+    commands.add(
+        ansibleConfig.getPlaybookLocation() + File.separator + ansibleConfig.getUpgradeWarPlaybook());
+    commands.add("-vvvv");
+    commands.add("--become");
+    commands.add("-e");
+    commands.add("groupid="+groupId);
+    commands.add("version="+version);
+    commands.add("name="+name);
+    commands.add("tcat_cluster_name="+clusterName);
+    log.info("executing  commands {} ", commands);
+    String processOutput = new ProcessExecutor(commands).readOutput(true).destroyOnExit().execute()
+        .getOutput().getUTF8();
+    ExecutionStatus status = new ExecutionStatus();
+    if (processOutput != null && processOutput.contains("ERROR"))
+      status.setCode(-1);
+    else
+      status.setCode(0);
+    status.setOutput(processOutput);
+    log.info("execution result {}  ", processOutput);
+    log.debug("execution status {}  ", status);
+
+    return Response.ok().entity(status).status(Status.OK).type(MediaType.APPLICATION_JSON).build();
+    
   }
 
 

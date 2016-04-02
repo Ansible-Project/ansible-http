@@ -23,4 +23,6 @@ public class AnsibleConfiguration {
   private String inventoryName;
   @Value("${ansible.adhoc.cmd}")
   private String adhocName;
+  @Value("${ansible.upgrade_war.playbook.name}")
+  private String upgradeWarPlaybook;
 }
