@@ -65,22 +65,6 @@ public class AnsibleEndpoint {
 
   @POST
   @Produces(MediaType.APPLICATION_JSON)
-  /*
-   * samples commands ansible -i hosts.stage aebbackend -m service -a
-   * "name=tcat-aebedx state=restarted" --user=username --extra-vars
-   * "ansible_sudo_pass=yourPassword" /usr/nano/local/bin/ansible -vvvv -i
-   * /usr/nano/build/stash/ansible-playbook/hosts.stage aebbackend -m service -a
-   * "name=tcat-aebedx state=restarted"
-   *
-   * ansible-playbook -i hosts.stage upgrade_war.yml --ask-become-pass ansible all -m ping -u bruce
-   * -b
-   * 
-   * @n$ible. /usr/nano/local/bin/ansible -vvvv -i
-   * /usr/nano/build/stash/ansible-playbook/hosts.stage aebbackend -a "whoami"
-   * /usr/nano/local/bin/ansible -i /usr/nano/build/stash/ansible-playbook/hosts.stage aebbackend -m
-   * command -a "/etc/init.d/tcat-aebedx status" --ask-become-pass --become
-   * 
-   */
   public Response executeCommands(@Context UriInfo uriInfo) throws Exception {
     String key = "STATUS";
     String groupId, version, name, clusterName;
