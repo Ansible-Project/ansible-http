@@ -82,17 +82,18 @@ public class AnsibleEndpoint {
    * 
    */
   public Response executeCommands(@Context UriInfo uriInfo) throws Exception {
-    String key="STATUS";
-    String groupId, version, name,clusterName;
-    MultivaluedMap<String, String> queryParams=   uriInfo.getQueryParameters();
-    key=queryParams.getFirst("key");
-    groupId=queryParams.getFirst("groupId");
-    version=queryParams.getFirst("version");
-    name=queryParams.getFirst("name");
-    clusterName=queryParams.getFirst("clusterName");
+    String key = "STATUS";
+    String groupId, version, name, clusterName;
+    MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
+    key = queryParams.getFirst("key");
+    groupId = queryParams.getFirst("groupId");
+    version = queryParams.getFirst("version");
+    name = queryParams.getFirst("name");
+    clusterName = queryParams.getFirst("clusterName");
     log.info("invoking adhoc command for key {} ", key);
     List<String> commands = new ArrayList<String>();
-    commands.add(ansibleConfig.getAnsibleLocation() + File.separator +ansibleConfig.getAdhocName());
+    commands
+        .add(ansibleConfig.getAnsibleLocation() + File.separator + ansibleConfig.getAdhocName());
     commands.add("-i");
     commands.add(
         ansibleConfig.getPlaybookLocation() + File.separator + ansibleConfig.getInventoryName());
@@ -105,16 +106,16 @@ public class AnsibleEndpoint {
         commands.add("command");
         break;
       case "DEPLOY":
-        return executeDeployPlaybook(groupId,name,version,clusterName);
+        return executeDeployPlaybook(groupId, name, version, clusterName);
       case "BOUNCE":
         commands.add("name=tcat-aebedx state=restarted");
         commands.add("-m");
         commands.add("service");
-      break;
+        break;
       default:
         break;
     }
-    
+
     commands.add("-vvvv");
     commands.add("--become");
     log.info("executing adhoc commands {} ", commands);
@@ -134,7 +135,7 @@ public class AnsibleEndpoint {
   }
 
   private Response executeDeployPlaybook(String groupId, String name, String version,
-      String clusterName) throws Exception{
+      String clusterName) throws Exception {
     log.info("executing upgrade_war.yml ");
     List<String> commands = new ArrayList<String>();
     commands.add(
@@ -142,15 +143,15 @@ public class AnsibleEndpoint {
     commands.add("-i");
     commands.add(
         ansibleConfig.getPlaybookLocation() + File.separator + ansibleConfig.getInventoryName());
-    commands.add(
-        ansibleConfig.getPlaybookLocation() + File.separator + ansibleConfig.getUpgradeWarPlaybook());
+    commands.add(ansibleConfig.getPlaybookLocation() + File.separator
+        + ansibleConfig.getUpgradeWarPlaybook());
     commands.add("-vvvv");
     commands.add("--become");
     commands.add("-e");
-    commands.add("groupid="+groupId);
-    commands.add("version="+version);
-    commands.add("name="+name);
-    commands.add("tcat_cluster_name="+clusterName);
+    commands.add("groupid=" + groupId);
+    commands.add("version=" + version);
+    commands.add("name=" + name);
+    commands.add("tcat_cluster_name=" + clusterName);
     log.info("executing  commands {} ", commands);
     String processOutput = new ProcessExecutor(commands).readOutput(true).destroyOnExit().execute()
         .getOutput().getUTF8();
@@ -164,7 +165,7 @@ public class AnsibleEndpoint {
     log.debug("execution status {}  ", status);
 
     return Response.ok().entity(status).status(Status.OK).type(MediaType.APPLICATION_JSON).build();
-    
+
   }
 
 
