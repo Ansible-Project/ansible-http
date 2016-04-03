@@ -130,12 +130,11 @@ public class AnsibleEndpoint {
     commands.add(ansibleConfig.getPlaybookLocation() + File.separator
         + ansibleConfig.getUpgradeWarPlaybook());
     commands.add("-vvvv");
-    commands.add("--become");
     commands.add("-e");
-    commands.add("groupid=" + groupId);
+    commands.add("\"groupid=" + groupId);
     commands.add("version=" + version);
     commands.add("name=" + name);
-    commands.add("tcat_cluster_name=" + clusterName);
+    commands.add("tcat_cluster_name=" + clusterName+"\"");
     log.info("executing  commands {} ", commands);
     String processOutput = new ProcessExecutor(commands).readOutput(true).destroyOnExit().execute()
         .getOutput().getUTF8();

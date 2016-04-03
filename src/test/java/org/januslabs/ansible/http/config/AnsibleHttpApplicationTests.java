@@ -104,7 +104,7 @@ public class AnsibleHttpApplicationTests {
     ResponseEntity<ExecutionStatus> response =
         restTemplate.exchange(
             "https://localhost:" + this.port + this.contextRoot + this.jerseycontextRoot
-                + "/execute" + "?key=STATUS",
+                + "/execute" + "?key=STATUS&groupId=service.registration&name=assurantregistrationservice&version=2.1.6&clusterName=aebedx",
             HttpMethod.POST, requestEntity, ExecutionStatus.class);
     Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
 
