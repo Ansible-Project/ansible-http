@@ -127,14 +127,14 @@ public class AnsibleEndpoint {
     commands.add("-i");
     commands.add(
         ansibleConfig.getPlaybookLocation() + File.separator + ansibleConfig.getInventoryName());
-    commands.add(ansibleConfig.getPlaybookLocation() + File.separator
-        + ansibleConfig.getUpgradeWarPlaybook());
+    
     commands.add("-vvvv");
     commands.add("-e");
-    commands.add("\"groupid=" + groupId);
-    commands.add("version=" + version);
-    commands.add("name=" + name);
-    commands.add("tcat_cluster_name=" + clusterName+"\"");
+    commands.add("name=" + name +" version=" + version + " groupid=" + groupId+ " tcat_cluster_name=" + clusterName);
+  
+    commands.add(ansibleConfig.getPlaybookLocation() + File.separator
+        + ansibleConfig.getUpgradeWarPlaybook());
+   
     log.info("executing  commands {} ", commands);
     String processOutput = new ProcessExecutor(commands).readOutput(true).destroyOnExit().execute()
         .getOutput().getUTF8();

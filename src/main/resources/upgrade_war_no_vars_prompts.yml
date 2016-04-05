@@ -7,17 +7,13 @@
   become: yes
 
   vars:
-    - name: "name"
-      
+    - v_name: "name"
 
-    - name: "version"
-     
+    - v_version: "version"
 
-    - name: "groupid"
-      
+    - v_groupid: "groupid"
 
-    - name: "tcat_cluster_name"
-      
+    - v_tcat_cluster_name: "tcat_cluster_name"
 
   tasks:
     - name: download application war files from artifactory
