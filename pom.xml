@@ -5,7 +5,7 @@
 
 	<groupId>org.januslabs</groupId>
 	<artifactId>ansible-http</artifactId>
-	<version>0.0.2</version>
+	<version>0.0.3</version>
 	<packaging>jar</packaging>
 
 	<name>ansible-http</name>
