@@ -5,11 +5,14 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.januslabs.ansible.http.endpoints.AnsibleEndpoint;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.SerializationFeature;
+
 @Component
 public class AnsibleHttpJerseyConfig extends ResourceConfig {
 
   public AnsibleHttpJerseyConfig() {
     register(AnsibleEndpoint.class);
     register(new LoggingFilter());
+    property(SerializationFeature.INDENT_OUTPUT.name(), true);
   }
 }

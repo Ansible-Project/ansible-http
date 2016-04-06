@@ -67,13 +67,14 @@ public class AnsibleEndpoint {
   @Produces(MediaType.APPLICATION_JSON)
   public Response executeCommands(@Context UriInfo uriInfo) throws Exception {
     String key = "STATUS";
-    String groupId, version, name, clusterName;
+    String groupId, version, name, clusterName,initdServiceName;
     MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
     key = queryParams.getFirst("key");
     groupId = queryParams.getFirst("groupId");
     version = queryParams.getFirst("version");
     name = queryParams.getFirst("name");
     clusterName = queryParams.getFirst("clusterName");
+    initdServiceName=queryParams.getFirst("initdServiceName");
     log.info("invoking adhoc command for key {} ", key);
     List<String> commands = new ArrayList<String>();
     commands
@@ -85,14 +86,14 @@ public class AnsibleEndpoint {
     commands.add("-a");
     switch (key.toUpperCase()) {
       case "STATUS":
-        commands.add("/etc/init.d/tcat-aebedx status");
+        commands.add("/etc/init.d/"+initdServiceName+" status");
         commands.add("-m");
         commands.add("command");
         break;
       case "DEPLOY":
         return executeDeployPlaybook(groupId, name, version, clusterName);
       case "BOUNCE":
-        commands.add("name=tcat-aebedx state=restarted");
+        commands.add("name="+initdServiceName+"=restarted");
         commands.add("-m");
         commands.add("service");
         break;
@@ -112,7 +113,7 @@ public class AnsibleEndpoint {
     else
       status.setCode(0);
     status.setOutput(processOutput);
-    log.info("execution result {}  ", processOutput);
+    log.trace("execution result {}  ", processOutput);
     log.debug("execution status {}  ", status);
 
     return Response.ok().entity(status).status(Status.OK).type(MediaType.APPLICATION_JSON).build();
@@ -151,6 +152,14 @@ public class AnsibleEndpoint {
 
   }
 
+  @Path("/check/{value}")
+  @GET
+  @Produces(MediaType.TEXT_PLAIN)
+  public Response passcheck(@javax.ws.rs.PathParam("value")String value) throws Exception {
+    return Response.ok().entity("@n$ible.").status(Status.OK).type(MediaType.TEXT_PLAIN)
+        .build();
+
+  }
 
 
 }
