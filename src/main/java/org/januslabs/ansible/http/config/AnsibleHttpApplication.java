@@ -16,6 +16,11 @@ public class AnsibleHttpApplication {
   public static void main(String[] args) {
     ALPN.debug = true;
     SpringApplication.run(AnsibleHttpApplication.class, args);
+    /*
+     * LD_LIBRARY_PATH=/usr/nano/local/lib
+      ANS_SVC_ADDR=https://msp0lnans001.etdbw.com:11080/ansiblehttp/apis/execute/check
+     */
+  
   }
 
   @Bean

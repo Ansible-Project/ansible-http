@@ -5,10 +5,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.lang.ProcessBuilder.Redirect;
+import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 import org.junit.Ignore;
+import org.junit.Test;
+import org.springframework.util.Assert;
 import org.xnio.streams.ReaderInputStream;
 import org.zeroturnaround.exec.ProcessExecutor;
 import org.zeroturnaround.exec.ProcessResult;
@@ -57,5 +61,16 @@ public class ProcessBuilderTests {
     // out.write("@n$ible.".getBytes());
     result1.getOutput().getLines().forEach(i -> System.out.println(i));
     // ProcessResult result2=new ProcessExecutor("ls -lrt").readOutput(true).execute();
+  }
+  
+  @Test
+  public void generateRandomString() throws Exception
+  {
+    SecureRandom random = SecureRandom.getInstanceStrong();
+    byte salt[] = new byte[50];
+    random.nextBytes(salt);
+    String encodedString=Base64.getEncoder().encodeToString( salt );
+    System.out.println(encodedString);
+    Assert.notNull(encodedString);
   }
 }
