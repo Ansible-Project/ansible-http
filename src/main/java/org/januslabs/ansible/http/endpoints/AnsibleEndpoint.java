@@ -18,6 +18,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import org.januslabs.ansible.http.endpoints.constraint.NotEmptyQueryParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.zeroturnaround.exec.ProcessExecutor;
 
@@ -28,9 +29,9 @@ import lombok.extern.slf4j.Slf4j;
 public class AnsibleEndpoint {
 
   private @Autowired AnsibleConfiguration ansibleConfig;
-  @Context
-  private UriInfo uriInfo;
-
+  
+  private @NotEmptyQueryParams @Context UriInfo uriInfo;
+ 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   public Response executePingPlaybook(@QueryParam("env") final String environment,
@@ -72,36 +73,7 @@ public class AnsibleEndpoint {
 
   }
 
-  private Response validate(String key,String environment,String clusterName) throws Exception
-  {
-   
-    if (environment == null) {
-      ExecutionStatus status = new ExecutionStatus();
-      status.setCode(Status.BAD_REQUEST.getStatusCode());
-      status.setOutput(
-          "Environment query param is required, possible values are stage, dev etc. Example ?env=stage");
-      return Response.status(Status.BAD_REQUEST).entity(status).type(MediaType.APPLICATION_JSON)
-          .build();
-    }
-    if ("STATUS".equalsIgnoreCase(key) && clusterName == null) {
-      ExecutionStatus status = new ExecutionStatus();
-      status.setCode(Status.BAD_REQUEST.getStatusCode());
-      status.setOutput(
-          "Cluster Service query param is required, sample values are aebedx. Example ?clusterName=aebedx");
-      return Response.status(Status.BAD_REQUEST).entity(status).type(MediaType.APPLICATION_JSON)
-          .build();
-    }
-    if ("BOUNCE".equalsIgnoreCase(key) && clusterName == null) {
-      ExecutionStatus status = new ExecutionStatus();
-      status.setCode(Status.BAD_REQUEST.getStatusCode());
-      status.setOutput(
-          "Cluster Service query param is required, sample values are aebedx. Example ?clusterName=aebedx");
-      return Response.status(Status.BAD_REQUEST).entity(status).type(MediaType.APPLICATION_JSON)
-          .build();
-    }
-    return null;
-
-  }
+ 
   @POST
   @Produces(MediaType.APPLICATION_JSON)
   public Response executeCommands(@Context UriInfo uriInfo) throws Exception {
@@ -114,7 +86,7 @@ public class AnsibleEndpoint {
     name = queryParams.getFirst("name");
     clusterName = queryParams.getFirst("clusterName");
     environment = queryParams.getFirst("env");
-    validate(key,environment,clusterName);
+    
 
     String inventoryFileName = ansibleConfig.getInventoryName().replaceAll("env", environment);
     ansibleConfig.setInventoryName(inventoryFileName);

@@ -65,6 +65,28 @@ public class AnsibleHttpApplicationTests {
     Assert.assertNotNull(response.getBody().getOutput());
 
   }
+  @Test
+  public void hello() throws Exception {
+
+    SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(
+        new SSLContextBuilder().loadTrustMaterial(null, new TrustSelfSignedStrategy()).build());
+
+    HttpClient httpClient = HttpClients.custom().setSSLSocketFactory(socketFactory).build();
+
+
+    ((HttpComponentsClientHttpRequestFactory) restTemplate.getRequestFactory())
+        .setHttpClient(httpClient);
+    HttpHeaders headers = new HttpHeaders();
+    headers.setAccept(Arrays.asList(MediaType.TEXT_PLAIN));
+
+    HttpEntity<String> entity = new HttpEntity<String>(headers);
+    ResponseEntity<String> response = restTemplate.exchange("https://localhost:"
+        + this.port + this.contextRoot + this.jerseycontextRoot + "/execute/hello",
+        HttpMethod.GET, entity, String.class);
+    Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
+    Assert.assertNotNull(response.getBody());
+
+  }
 
   @Test
   public void contextLoadsNonSSL() throws Exception {
@@ -218,9 +240,9 @@ public class AnsibleHttpApplicationTests {
         new HttpEntity<HashMap<String, String>>(headers);
 
 
-    ResponseEntity<ExecutionStatus> response = restTemplate.exchange(
+    ResponseEntity<Object> response = restTemplate.exchange(
         "https://localhost:" + this.port + this.contextRoot + this.jerseycontextRoot + "/execute",
-        HttpMethod.POST, requestEntity, ExecutionStatus.class);
+        HttpMethod.POST, requestEntity, Object.class);
     Assert.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     Assert.assertNotNull(response.getBody());
 
@@ -244,11 +266,11 @@ public class AnsibleHttpApplicationTests {
         new HttpEntity<HashMap<String, String>>(headers);
 
 
-    ResponseEntity<ExecutionStatus> response =
+    ResponseEntity<Object> response =
         restTemplate.exchange(
             "https://localhost:" + this.port + this.contextRoot + this.jerseycontextRoot
                 + "/execute?key=test&env=stage",
-            HttpMethod.POST, requestEntity, ExecutionStatus.class);
+            HttpMethod.POST, requestEntity, Object.class);
     Assert.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     Assert.assertNotNull(response.getBody());
 
