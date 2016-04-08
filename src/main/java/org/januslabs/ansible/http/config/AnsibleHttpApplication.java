@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerFactory;
 import org.springframework.boot.context.embedded.undertow.UndertowEmbeddedServletContainerFactory;
 import org.springframework.context.annotation.Bean;
+import org.xnio.Options;
 
 import io.undertow.UndertowOptions;
 
@@ -16,11 +17,6 @@ public class AnsibleHttpApplication {
   public static void main(String[] args) {
     ALPN.debug = true;
     SpringApplication.run(AnsibleHttpApplication.class, args);
-    /*
-     * LD_LIBRARY_PATH=/usr/nano/local/lib
-      ANS_SVC_ADDR=https://msp0lnans001.etdbw.com:11080/ansiblehttp/apis/execute/check
-     */
-  
   }
 
   @Bean
@@ -37,6 +33,7 @@ public class AnsibleHttpApplication {
       builder.setServerOption(UndertowOptions.ENABLE_SPDY, Boolean.TRUE);
       builder.setServerOption(UndertowOptions.ENABLE_STATISTICS, Boolean.TRUE);
       builder.setServerOption(UndertowOptions.RECORD_REQUEST_START_TIME, Boolean.TRUE);
+      builder.setSocketOption(Options.BACKLOG, 100000);
       builder.addHttpListener(11081, "localhost");
     });
     return factory;

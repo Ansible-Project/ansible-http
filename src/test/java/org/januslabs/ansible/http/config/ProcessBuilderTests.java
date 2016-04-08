@@ -62,14 +62,13 @@ public class ProcessBuilderTests {
     result1.getOutput().getLines().forEach(i -> System.out.println(i));
     // ProcessResult result2=new ProcessExecutor("ls -lrt").readOutput(true).execute();
   }
-  
+
   @Test
-  public void generateRandomString() throws Exception
-  {
+  public void generateRandomString() throws Exception {
     SecureRandom random = SecureRandom.getInstanceStrong();
     byte salt[] = new byte[50];
     random.nextBytes(salt);
-    String encodedString=Base64.getEncoder().encodeToString( salt );
+    String encodedString = Base64.getEncoder().encodeToString(salt);
     System.out.println(encodedString);
     Assert.notNull(encodedString);
   }

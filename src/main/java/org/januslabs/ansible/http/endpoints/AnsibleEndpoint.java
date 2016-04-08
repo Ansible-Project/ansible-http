@@ -29,21 +29,13 @@ public class AnsibleEndpoint {
 
   private @Autowired AnsibleConfiguration ansibleConfig;
 
- /* @KeyType
-  @QueryParam("key")
-  @NotBlank(message="{Key is null , needs to be one of these values STATUS, BOUNCE, DEPLOY,PING}")
-  private String keyType;
-  
-  @EnvironmentName
-  @QueryParam("env")
-  @NotBlank(message="{env is null , needs to be one of these values stage,dev etc.}")
-  private String envName;*/
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  public Response executePingPlaybook(@QueryParam("env") final String environment,@QueryParam("key") final String key) throws Exception {
+  public Response executePingPlaybook(@QueryParam("env") final String environment,
+      @QueryParam("key") final String key) throws Exception {
     log.info("executing hello.yml ");
-    
+
     String inventoryFileName = ansibleConfig.getInventoryName().replaceAll("env", environment);
     ansibleConfig.setInventoryName(inventoryFileName);
     List<String> commands = new ArrayList<String>();
@@ -91,12 +83,23 @@ public class AnsibleEndpoint {
     name = queryParams.getFirst("name");
     clusterName = queryParams.getFirst("clusterName");
     environment = queryParams.getFirst("env");
-   
+
+
+    if (key == null || (!(key.equalsIgnoreCase("STATUS") || key.equalsIgnoreCase("DEPLOY")
+        || key.equalsIgnoreCase("BOUNCE")))) {
+      ExecutionStatus status = new ExecutionStatus();
+      status.setCode(Status.BAD_REQUEST.getStatusCode());
+      status.setOutput(
+          "Key query param is required, possible values are STATUS, DEPLOY,BOUNCE, PING etc. Example ?key=STATUS");
+      return Response.status(Status.BAD_REQUEST).entity(status).type(MediaType.APPLICATION_JSON)
+          .build();
+    }
+
     if (environment == null) {
       ExecutionStatus status = new ExecutionStatus();
       status.setCode(Status.BAD_REQUEST.getStatusCode());
       status.setOutput(
-          "Environment query param is required, possible values are Stage, dev etc. Example ?env=stage");
+          "Environment query param is required, possible values are stage, dev etc. Example ?env=stage");
       return Response.status(Status.BAD_REQUEST).entity(status).type(MediaType.APPLICATION_JSON)
           .build();
     }
@@ -116,53 +119,25 @@ public class AnsibleEndpoint {
       return Response.status(Status.BAD_REQUEST).entity(status).type(MediaType.APPLICATION_JSON)
           .build();
     }
-    Environment env = Environment.valueOf(environment);
+
     String inventoryFileName = ansibleConfig.getInventoryName().replaceAll("env", environment);
     ansibleConfig.setInventoryName(inventoryFileName);
-    log.info("invoking adhoc command for key, for environment {} {}", key, env);
-    List<String> commands = new ArrayList<String>();
-    commands
-        .add(ansibleConfig.getAnsibleLocation() + File.separator + ansibleConfig.getAdhocName());
-    commands.add("-i");
-    commands.add(
-        ansibleConfig.getPlaybookLocation() + File.separator + ansibleConfig.getInventoryName());
-    commands.add("aebbackend");
-    commands.add("-a");
     switch (key.toUpperCase()) {
       case "STATUS":
-        /*commands.add("/etc/init.d/" + initdServiceName + " status");
-        commands.add("-m");
-        commands.add("command");*/
-        executeStatusPlaybook(clusterName);
-        break;
+        return executeStatusPlaybook(clusterName);
       case "DEPLOY":
         return executeDeployPlaybook(groupId, name, version, clusterName);
       case "BOUNCE":
-    /*    commands.add("name=" + initdServiceName + "=restarted");
-        commands.add("-m");
-        commands.add("service");*/
-        executeBouncePlaybook(clusterName);
-        break;
+        return executeBouncePlaybook(clusterName);
+
       default:
         break;
     }
 
-    commands.add("-vvvv");
-    commands.add("--become");
-    log.info("executing adhoc commands {} ", commands);
-    String processOutput = new ProcessExecutor(commands).readOutput(true).destroyOnExit().execute()
-        .getOutput().getUTF8();
 
-    ExecutionStatus status = new ExecutionStatus();
-    if (processOutput != null && processOutput.contains("ERROR"))
-      status.setCode(-1);
-    else
-      status.setCode(0);
-    status.setOutput(processOutput);
-    log.trace("execution result {}  ", processOutput);
-    log.debug("execution status {}  ", status);
 
-    return Response.ok().entity(status).status(Status.OK).type(MediaType.APPLICATION_JSON).build();
+    return Response.ok().entity(new ExecutionStatus()).status(Status.OK)
+        .type(MediaType.APPLICATION_JSON).build();
   }
 
   private Response executeStatusPlaybook(String clusterName) throws Exception {
@@ -177,9 +152,7 @@ public class AnsibleEndpoint {
 
     commands.add("-vvvv");
     commands.add("-e");
-    commands
-        .add("tcat_cluster_name="
-            + clusterName + " token=" + getToken());
+    commands.add("tcat_cluster_name=" + clusterName + " token=" + getToken());
 
     commands.add(ansibleConfig.getPlaybookLocation() + File.separator
         + ansibleConfig.getStatusServerPlaybook());
@@ -200,17 +173,16 @@ public class AnsibleEndpoint {
 
   }
 
-  private String getToken() throws Exception
-  {
+  private String getToken() throws Exception {
     SecureRandom random = SecureRandom.getInstanceStrong();
     byte salt[] = new byte[20];
     random.nextBytes(salt);
     return Base64.getEncoder().encodeToString(salt);
   }
-  
+
   private Response executeBouncePlaybook(String clusterName) throws Exception {
     log.info("executing tomcat_restart.yml ");
-    
+
     List<String> commands = new ArrayList<String>();
     commands.add(
         ansibleConfig.getAnsibleLocation() + File.separator + ansibleConfig.getPlaybookCommand());
@@ -220,9 +192,7 @@ public class AnsibleEndpoint {
 
     commands.add("-vvvv");
     commands.add("-e");
-    commands
-        .add("tcat_cluster_name="
-            + clusterName + " token=" + getToken());
+    commands.add("tcat_cluster_name=" + clusterName + " token=" + getToken());
 
     commands.add(ansibleConfig.getPlaybookLocation() + File.separator
         + ansibleConfig.getBounceServerPlaybook());

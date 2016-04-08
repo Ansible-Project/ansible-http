@@ -29,13 +29,18 @@
 		<appender-ref ref="ASYNC" />
 	</logger>
 	<logger name="org.springframework.boot"
-		level="info" additivity="false">
-		<appender-ref ref="ASYNC" />
-	</logger>
-	<logger name="io.undertow"
 		level="debug" additivity="false">
 		<appender-ref ref="ASYNC" />
 	</logger>
+	<logger name="io.undertow"
+		level="info" additivity="false">
+		<appender-ref ref="ASYNC" />
+	</logger>
+	<logger name="org.eclipse.jetty.alpn"
+		level="info" additivity="false">
+		<appender-ref ref="ASYNC" />
+	</logger>
+	
 	<logger name="org.glassfish.jersey"
 	level="debug" additivity="false">
 		<appender-ref ref="ASYNC" />

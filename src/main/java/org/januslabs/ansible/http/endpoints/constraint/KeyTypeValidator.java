@@ -24,7 +24,7 @@ public class KeyTypeValidator implements ConstraintValidator<KeyType, String> {
       return false;
     }
     return (value.equalsIgnoreCase("STATUS") || value.equalsIgnoreCase("DEPLOY")
-        || value.equalsIgnoreCase("BOUNCE")|| value.equalsIgnoreCase("PING"));
+        || value.equalsIgnoreCase("BOUNCE") || value.equalsIgnoreCase("PING"));
   }
 
 }

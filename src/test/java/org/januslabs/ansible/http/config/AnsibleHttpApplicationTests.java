@@ -57,8 +57,8 @@ public class AnsibleHttpApplicationTests {
     headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
 
     HttpEntity<String> entity = new HttpEntity<String>(headers);
-    ResponseEntity<ExecutionStatus> response = restTemplate.exchange(
-        "https://localhost:" + this.port + this.contextRoot + this.jerseycontextRoot + "/execute?env=stage&key=PING",
+    ResponseEntity<ExecutionStatus> response = restTemplate.exchange("https://localhost:"
+        + this.port + this.contextRoot + this.jerseycontextRoot + "/execute?env=stage&key=PING",
         HttpMethod.GET, entity, ExecutionStatus.class);
     Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
     Assert.assertEquals(new Integer(0), response.getBody().getCode());
@@ -73,14 +73,15 @@ public class AnsibleHttpApplicationTests {
     headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
 
     HttpEntity<String> entity = new HttpEntity<String>(headers);
-    ResponseEntity<ExecutionStatus> response = restTemplate.exchange(
-        "http://localhost:" + 11081 + this.contextRoot + this.jerseycontextRoot + "/execute?env=stage&key=PING",
-        HttpMethod.GET, entity, ExecutionStatus.class);
+    ResponseEntity<ExecutionStatus> response = restTemplate.exchange("http://localhost:" + 11081
+        + this.contextRoot + this.jerseycontextRoot + "/execute?env=stage&key=PING", HttpMethod.GET,
+        entity, ExecutionStatus.class);
     Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
     Assert.assertEquals(new Integer(0), response.getBody().getCode());
     Assert.assertNotNull(response.getBody().getOutput());
 
   }
+
   @Test
   public void check() throws Exception {
 
@@ -94,27 +95,30 @@ public class AnsibleHttpApplicationTests {
         .setHttpClient(httpClient);
     HttpHeaders headers = new HttpHeaders();
     headers.setAccept(Arrays.asList(MediaType.TEXT_PLAIN));
- 
+
 
     HttpEntity<String> entity = new HttpEntity<String>(headers);
-    ResponseEntity<String> response = restTemplate.exchange(
-        "https://localhost:" + this.port + this.contextRoot + this.jerseycontextRoot + "/execute/check/"+generateRandomString(),
-        HttpMethod.GET, entity, String.class);
+    ResponseEntity<String> response =
+        restTemplate
+            .exchange(
+                "https://localhost:" + this.port + this.contextRoot + this.jerseycontextRoot
+                    + "/execute/check/" + generateRandomString(),
+                HttpMethod.GET, entity, String.class);
     Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
     Assert.assertEquals("@n$ible.", response.getBody());
-    
+
 
   }
 
-  private String generateRandomString() throws Exception
-  {
+  private String generateRandomString() throws Exception {
     SecureRandom random = SecureRandom.getInstanceStrong();
     byte salt[] = new byte[50];
     random.nextBytes(salt);
-    String encodedString=Base64.getEncoder().encodeToString( salt );
+    String encodedString = Base64.getEncoder().encodeToString(salt);
     System.out.println(encodedString);
     return encodedString;
   }
+
   @Test
   public void executeCommands() throws Exception {
     SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(
@@ -127,25 +131,75 @@ public class AnsibleHttpApplicationTests {
         .setHttpClient(httpClient);
     HttpHeaders headers = new HttpHeaders();
     headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-    
-    HashMap<String, String> postParameters = new HashMap<String, String>();
-    postParameters.put("field 1", "value 1");
-    postParameters.put("field 2", "value 2");
-    postParameters.put("field 2", "value 3");
+
+
     HttpEntity<HashMap<String, String>> requestEntity =
         new HttpEntity<HashMap<String, String>>(headers);
 
 
-    ResponseEntity<ExecutionStatus> response =
-        restTemplate.exchange(
-            "https://localhost:" + this.port + this.contextRoot + this.jerseycontextRoot
-                + "/execute" + "?key=DEPLOY&groupId=service.registration&name=assurantregistrationservice&version=2.1.6&clusterName=aebedx&env=stage",
-            HttpMethod.POST, requestEntity, ExecutionStatus.class);
+    ResponseEntity<ExecutionStatus> response = restTemplate.exchange(
+        "https://localhost:" + this.port + this.contextRoot + this.jerseycontextRoot + "/execute"
+            + "?key=DEPLOY&groupId=service.registration&name=assurantregistrationservice&version=2.1.6&clusterName=aebedx&env=stage",
+        HttpMethod.POST, requestEntity, ExecutionStatus.class);
     Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
 
 
   }
-  
+
+  @Test
+  public void executeCommands_Bounce() throws Exception {
+    SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(
+        new SSLContextBuilder().loadTrustMaterial(null, new TrustSelfSignedStrategy()).build());
+
+    HttpClient httpClient = HttpClients.custom().setSSLSocketFactory(socketFactory).build();
+
+
+    ((HttpComponentsClientHttpRequestFactory) restTemplate.getRequestFactory())
+        .setHttpClient(httpClient);
+    HttpHeaders headers = new HttpHeaders();
+    headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+
+
+    HttpEntity<HashMap<String, String>> requestEntity =
+        new HttpEntity<HashMap<String, String>>(headers);
+
+
+    ResponseEntity<ExecutionStatus> response = restTemplate.exchange(
+        "https://localhost:" + this.port + this.contextRoot + this.jerseycontextRoot + "/execute"
+            + "?key=BOUNCE&groupId=service.registration&name=assurantregistrationservice&version=2.1.6&clusterName=aebedx&env=stage",
+        HttpMethod.POST, requestEntity, ExecutionStatus.class);
+    Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
+
+
+  }
+
+  @Test
+  public void executeCommands_Status() throws Exception {
+    SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(
+        new SSLContextBuilder().loadTrustMaterial(null, new TrustSelfSignedStrategy()).build());
+
+    HttpClient httpClient = HttpClients.custom().setSSLSocketFactory(socketFactory).build();
+
+
+    ((HttpComponentsClientHttpRequestFactory) restTemplate.getRequestFactory())
+        .setHttpClient(httpClient);
+    HttpHeaders headers = new HttpHeaders();
+    headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+
+
+    HttpEntity<HashMap<String, String>> requestEntity =
+        new HttpEntity<HashMap<String, String>>(headers);
+
+
+    ResponseEntity<ExecutionStatus> response = restTemplate.exchange(
+        "https://localhost:" + this.port + this.contextRoot + this.jerseycontextRoot + "/execute"
+            + "?key=STATUS&groupId=service.registration&name=assurantregistrationservice&version=2.1.6&clusterName=aebedx&env=stage",
+        HttpMethod.POST, requestEntity, ExecutionStatus.class);
+    Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
+
+
+  }
+
   @Test
   public void executeCommands_NoKey() throws Exception {
     SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(
@@ -158,22 +212,20 @@ public class AnsibleHttpApplicationTests {
         .setHttpClient(httpClient);
     HttpHeaders headers = new HttpHeaders();
     headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
- 
+
 
     HttpEntity<HashMap<String, String>> requestEntity =
         new HttpEntity<HashMap<String, String>>(headers);
 
 
-    ResponseEntity<Object> response =
-        restTemplate.exchange(
-            "https://localhost:" + this.port + this.contextRoot + this.jerseycontextRoot
-                + "/execute",
-            HttpMethod.POST, requestEntity, Object.class);
+    ResponseEntity<ExecutionStatus> response = restTemplate.exchange(
+        "https://localhost:" + this.port + this.contextRoot + this.jerseycontextRoot + "/execute",
+        HttpMethod.POST, requestEntity, ExecutionStatus.class);
     Assert.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-System.out.println(response.getBody());
+    Assert.assertNotNull(response.getBody());
 
   }
-  
+
   @Test
   public void executeCommands_InvalidKey() throws Exception {
     SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(
@@ -186,19 +238,19 @@ System.out.println(response.getBody());
         .setHttpClient(httpClient);
     HttpHeaders headers = new HttpHeaders();
     headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
- 
+
 
     HttpEntity<HashMap<String, String>> requestEntity =
         new HttpEntity<HashMap<String, String>>(headers);
 
 
-    ResponseEntity<Object> response =
+    ResponseEntity<ExecutionStatus> response =
         restTemplate.exchange(
             "https://localhost:" + this.port + this.contextRoot + this.jerseycontextRoot
-                + "/execute?key=test",
-            HttpMethod.POST, requestEntity, Object.class);
+                + "/execute?key=test&env=stage",
+            HttpMethod.POST, requestEntity, ExecutionStatus.class);
     Assert.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-System.out.println(response.getBody());
+    Assert.assertNotNull(response.getBody());
 
   }
 

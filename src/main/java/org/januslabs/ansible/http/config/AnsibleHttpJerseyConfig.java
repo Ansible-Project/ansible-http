@@ -16,5 +16,5 @@ public class AnsibleHttpJerseyConfig extends ResourceConfig {
     register(new LoggingFilter());
     property(SerializationFeature.INDENT_OUTPUT.name(), true);
     property(ServerProperties.BV_SEND_ERROR_IN_RESPONSE, true);
-   }
+  }
 }
