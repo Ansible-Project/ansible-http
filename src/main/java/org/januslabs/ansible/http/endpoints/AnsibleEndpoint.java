@@ -28,7 +28,8 @@ import lombok.extern.slf4j.Slf4j;
 public class AnsibleEndpoint {
 
   private @Autowired AnsibleConfiguration ansibleConfig;
-
+  @Context
+  private UriInfo uriInfo;
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
@@ -71,30 +72,9 @@ public class AnsibleEndpoint {
 
   }
 
-  @POST
-  @Produces(MediaType.APPLICATION_JSON)
-  public Response executeCommands(@Context UriInfo uriInfo) throws Exception {
-
-    String key, groupId, version, name, clusterName, environment;
-    MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
-    key = queryParams.getFirst("key");
-    groupId = queryParams.getFirst("groupId");
-    version = queryParams.getFirst("version");
-    name = queryParams.getFirst("name");
-    clusterName = queryParams.getFirst("clusterName");
-    environment = queryParams.getFirst("env");
-
-
-    if (key == null || (!(key.equalsIgnoreCase("STATUS") || key.equalsIgnoreCase("DEPLOY")
-        || key.equalsIgnoreCase("BOUNCE")))) {
-      ExecutionStatus status = new ExecutionStatus();
-      status.setCode(Status.BAD_REQUEST.getStatusCode());
-      status.setOutput(
-          "Key query param is required, possible values are STATUS, DEPLOY,BOUNCE, PING etc. Example ?key=STATUS");
-      return Response.status(Status.BAD_REQUEST).entity(status).type(MediaType.APPLICATION_JSON)
-          .build();
-    }
-
+  private Response validate(String key,String environment,String clusterName) throws Exception
+  {
+   
     if (environment == null) {
       ExecutionStatus status = new ExecutionStatus();
       status.setCode(Status.BAD_REQUEST.getStatusCode());
@@ -119,6 +99,22 @@ public class AnsibleEndpoint {
       return Response.status(Status.BAD_REQUEST).entity(status).type(MediaType.APPLICATION_JSON)
           .build();
     }
+    return null;
+
+  }
+  @POST
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response executeCommands(@Context UriInfo uriInfo) throws Exception {
+
+    MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
+    String key, groupId, version, name, clusterName, environment;
+    key = queryParams.getFirst("key");
+    groupId = queryParams.getFirst("groupId");
+    version = queryParams.getFirst("version");
+    name = queryParams.getFirst("name");
+    clusterName = queryParams.getFirst("clusterName");
+    environment = queryParams.getFirst("env");
+    validate(key,environment,clusterName);
 
     String inventoryFileName = ansibleConfig.getInventoryName().replaceAll("env", environment);
     ansibleConfig.setInventoryName(inventoryFileName);
@@ -133,8 +129,6 @@ public class AnsibleEndpoint {
       default:
         break;
     }
-
-
 
     return Response.ok().entity(new ExecutionStatus()).status(Status.OK)
         .type(MediaType.APPLICATION_JSON).build();
