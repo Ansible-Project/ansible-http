@@ -4,10 +4,11 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.Optional;
 
-import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.januslabs.ansible.http.endpoints.ExecutionStatus;
@@ -15,9 +16,9 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.TestRestTemplate;
-import org.springframework.boot.test.WebIntegrationTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -26,11 +27,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.web.client.RestTemplate;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = AnsibleHttpApplication.class)
-@WebIntegrationTest(randomPort = true)
+@SpringBootTest(webEnvironment =WebEnvironment.RANDOM_PORT)
 public class AnsibleHttpApplicationTests {
 
   @Value("${local.server.port}")
@@ -39,7 +38,7 @@ public class AnsibleHttpApplicationTests {
   private String contextRoot;
   @Value("${spring.jersey.application-path}")
   private String jerseycontextRoot;
-  private RestTemplate restTemplate = new TestRestTemplate();
+  private TestRestTemplate restTemplate = new TestRestTemplate();
 
 
   @Test
@@ -48,21 +47,22 @@ public class AnsibleHttpApplicationTests {
     SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(
         new SSLContextBuilder().loadTrustMaterial(null, new TrustSelfSignedStrategy()).build());
 
-    HttpClient httpClient = HttpClients.custom().setSSLSocketFactory(socketFactory).build();
+    CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(socketFactory).build();
 
 
-    ((HttpComponentsClientHttpRequestFactory) restTemplate.getRequestFactory())
+    ((HttpComponentsClientHttpRequestFactory) restTemplate.getRestTemplate().getRequestFactory())
         .setHttpClient(httpClient);
     HttpHeaders headers = new HttpHeaders();
     headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
 
-    HttpEntity<String> entity = new HttpEntity<String>(headers);
+    HttpEntity<String> entity = new HttpEntity<>(headers);
     ResponseEntity<ExecutionStatus> response = restTemplate.exchange("https://localhost:"
         + this.port + this.contextRoot + this.jerseycontextRoot + "/execute?env=stage&key=PING",
         HttpMethod.GET, entity, ExecutionStatus.class);
     Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
     Assert.assertEquals(new Integer(0), response.getBody().getCode());
     Assert.assertNotNull(response.getBody().getOutput());
+    httpClient.close();
 
   }
   @Test
@@ -71,20 +71,21 @@ public class AnsibleHttpApplicationTests {
     SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(
         new SSLContextBuilder().loadTrustMaterial(null, new TrustSelfSignedStrategy()).build());
 
-    HttpClient httpClient = HttpClients.custom().setSSLSocketFactory(socketFactory).build();
+    CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(socketFactory).build();
 
 
-    ((HttpComponentsClientHttpRequestFactory) restTemplate.getRequestFactory())
+    ((HttpComponentsClientHttpRequestFactory) restTemplate.getRestTemplate().getRequestFactory())
         .setHttpClient(httpClient);
     HttpHeaders headers = new HttpHeaders();
     headers.setAccept(Arrays.asList(MediaType.TEXT_PLAIN));
 
-    HttpEntity<String> entity = new HttpEntity<String>(headers);
+    HttpEntity<String> entity = new HttpEntity<>(headers);
     ResponseEntity<String> response = restTemplate.exchange("https://localhost:"
         + this.port + this.contextRoot + this.jerseycontextRoot + "/execute/hello",
         HttpMethod.GET, entity, String.class);
     Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
     Assert.assertNotNull(response.getBody());
+    httpClient.close();
 
   }
 
@@ -94,7 +95,7 @@ public class AnsibleHttpApplicationTests {
     HttpHeaders headers = new HttpHeaders();
     headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
 
-    HttpEntity<String> entity = new HttpEntity<String>(headers);
+    HttpEntity<String> entity = new HttpEntity<>(headers);
     ResponseEntity<ExecutionStatus> response = restTemplate.exchange("http://localhost:" + 11081
         + this.contextRoot + this.jerseycontextRoot + "/execute?env=stage&key=PING", HttpMethod.GET,
         entity, ExecutionStatus.class);
@@ -110,16 +111,16 @@ public class AnsibleHttpApplicationTests {
     SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(
         new SSLContextBuilder().loadTrustMaterial(null, new TrustSelfSignedStrategy()).build());
 
-    HttpClient httpClient = HttpClients.custom().setSSLSocketFactory(socketFactory).build();
+    CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(socketFactory).build();
 
 
-    ((HttpComponentsClientHttpRequestFactory) restTemplate.getRequestFactory())
+    ((HttpComponentsClientHttpRequestFactory) restTemplate.getRestTemplate().getRequestFactory())
         .setHttpClient(httpClient);
     HttpHeaders headers = new HttpHeaders();
     headers.setAccept(Arrays.asList(MediaType.TEXT_PLAIN));
 
 
-    HttpEntity<String> entity = new HttpEntity<String>(headers);
+    HttpEntity<String> entity = new HttpEntity<>(headers);
     ResponseEntity<String> response =
         restTemplate
             .exchange(
@@ -128,7 +129,7 @@ public class AnsibleHttpApplicationTests {
                 HttpMethod.GET, entity, String.class);
     Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
     Assert.assertEquals("@n$ible.", response.getBody());
-
+    httpClient.close();
 
   }
 
@@ -146,17 +147,17 @@ public class AnsibleHttpApplicationTests {
     SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(
         new SSLContextBuilder().loadTrustMaterial(null, new TrustSelfSignedStrategy()).build());
 
-    HttpClient httpClient = HttpClients.custom().setSSLSocketFactory(socketFactory).build();
+    CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(socketFactory).build();
 
 
-    ((HttpComponentsClientHttpRequestFactory) restTemplate.getRequestFactory())
+    ((HttpComponentsClientHttpRequestFactory) restTemplate.getRestTemplate().getRequestFactory())
         .setHttpClient(httpClient);
     HttpHeaders headers = new HttpHeaders();
     headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
 
 
     HttpEntity<HashMap<String, String>> requestEntity =
-        new HttpEntity<HashMap<String, String>>(headers);
+        new HttpEntity<>(headers);
 
 
     ResponseEntity<ExecutionStatus> response = restTemplate.exchange(
@@ -164,7 +165,7 @@ public class AnsibleHttpApplicationTests {
             + "?key=DEPLOY&groupId=service.registration&name=assurantregistrationservice&version=2.1.6&clusterName=aebedx&env=stage",
         HttpMethod.POST, requestEntity, ExecutionStatus.class);
     Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
-
+    httpClient.close();
 
   }
 
@@ -173,25 +174,25 @@ public class AnsibleHttpApplicationTests {
     SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(
         new SSLContextBuilder().loadTrustMaterial(null, new TrustSelfSignedStrategy()).build());
 
-    HttpClient httpClient = HttpClients.custom().setSSLSocketFactory(socketFactory).build();
+    CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(socketFactory).build();
 
 
-    ((HttpComponentsClientHttpRequestFactory) restTemplate.getRequestFactory())
+    ((HttpComponentsClientHttpRequestFactory) restTemplate.getRestTemplate().getRequestFactory())
         .setHttpClient(httpClient);
     HttpHeaders headers = new HttpHeaders();
     headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
 
 
     HttpEntity<HashMap<String, String>> requestEntity =
-        new HttpEntity<HashMap<String, String>>(headers);
+        new HttpEntity<>(headers);
 
 
     ResponseEntity<ExecutionStatus> response = restTemplate.exchange(
         "https://localhost:" + this.port + this.contextRoot + this.jerseycontextRoot + "/execute"
-            + "?key=BOUNCE&groupId=service.registration&name=assurantregistrationservice&version=2.1.6&clusterName=aebedx&env=stage",
+            + "?key=BOUNCE&groupId=service.registration&name=assurantregistrationservice&version=2.1.6&clusterName=aebmobile&env=dev",
         HttpMethod.POST, requestEntity, ExecutionStatus.class);
     Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
-
+    httpClient.close();
 
   }
 
@@ -200,17 +201,17 @@ public class AnsibleHttpApplicationTests {
     SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(
         new SSLContextBuilder().loadTrustMaterial(null, new TrustSelfSignedStrategy()).build());
 
-    HttpClient httpClient = HttpClients.custom().setSSLSocketFactory(socketFactory).build();
+    CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(socketFactory).build();
 
 
-    ((HttpComponentsClientHttpRequestFactory) restTemplate.getRequestFactory())
+    ((HttpComponentsClientHttpRequestFactory) restTemplate.getRestTemplate().getRequestFactory())
         .setHttpClient(httpClient);
     HttpHeaders headers = new HttpHeaders();
     headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
 
 
     HttpEntity<HashMap<String, String>> requestEntity =
-        new HttpEntity<HashMap<String, String>>(headers);
+        new HttpEntity<>(headers);
 
 
     ResponseEntity<ExecutionStatus> response = restTemplate.exchange(
@@ -218,7 +219,7 @@ public class AnsibleHttpApplicationTests {
             + "?key=STATUS&groupId=service.registration&name=assurantregistrationservice&version=2.1.6&clusterName=aebedx&env=stage",
         HttpMethod.POST, requestEntity, ExecutionStatus.class);
     Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
-
+    httpClient.close();
 
   }
 
@@ -227,17 +228,17 @@ public class AnsibleHttpApplicationTests {
     SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(
         new SSLContextBuilder().loadTrustMaterial(null, new TrustSelfSignedStrategy()).build());
 
-    HttpClient httpClient = HttpClients.custom().setSSLSocketFactory(socketFactory).build();
+    CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(socketFactory).build();
 
 
-    ((HttpComponentsClientHttpRequestFactory) restTemplate.getRequestFactory())
+    ((HttpComponentsClientHttpRequestFactory) restTemplate.getRestTemplate().getRequestFactory())
         .setHttpClient(httpClient);
     HttpHeaders headers = new HttpHeaders();
     headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
 
 
     HttpEntity<HashMap<String, String>> requestEntity =
-        new HttpEntity<HashMap<String, String>>(headers);
+        new HttpEntity<>(headers);
 
 
     ResponseEntity<Object> response = restTemplate.exchange(
@@ -245,6 +246,7 @@ public class AnsibleHttpApplicationTests {
         HttpMethod.POST, requestEntity, Object.class);
     Assert.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     Assert.assertNotNull(response.getBody());
+    httpClient.close();
 
   }
 
@@ -253,17 +255,17 @@ public class AnsibleHttpApplicationTests {
     SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(
         new SSLContextBuilder().loadTrustMaterial(null, new TrustSelfSignedStrategy()).build());
 
-    HttpClient httpClient = HttpClients.custom().setSSLSocketFactory(socketFactory).build();
+    CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(socketFactory).build();
 
 
-    ((HttpComponentsClientHttpRequestFactory) restTemplate.getRequestFactory())
+    ((HttpComponentsClientHttpRequestFactory) restTemplate.getRestTemplate().getRequestFactory())
         .setHttpClient(httpClient);
     HttpHeaders headers = new HttpHeaders();
     headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
 
 
     HttpEntity<HashMap<String, String>> requestEntity =
-        new HttpEntity<HashMap<String, String>>(headers);
+        new HttpEntity<>(headers);
 
 
     ResponseEntity<Object> response =
@@ -273,7 +275,17 @@ public class AnsibleHttpApplicationTests {
             HttpMethod.POST, requestEntity, Object.class);
     Assert.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     Assert.assertNotNull(response.getBody());
+    httpClient.close();
 
+  }
+  
+  @Test
+  public void getValueOrDefault() {
+    String value="wlp";
+    String defaultValue="tcat";
+    String newValue= Optional.ofNullable(value)
+        .filter(s -> s != null && !s.isEmpty()).orElse(defaultValue);
+    Assert.assertEquals("wlp",newValue);
   }
 
 }

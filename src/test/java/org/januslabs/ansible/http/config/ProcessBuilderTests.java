@@ -21,7 +21,7 @@ public class ProcessBuilderTests {
 
   @Ignore
   public void login() throws Exception {
-    List<String> commands = new ArrayList<String>();
+    List<String> commands = new ArrayList<>();
     commands.add("ssh");
     // commands.add("-t");
     // commands.add ("-o StrictHostKeyChecking=no");
@@ -48,7 +48,7 @@ public class ProcessBuilderTests {
 
   @Ignore
   public void login2() throws Exception {
-    List<String> commands = new ArrayList<String>();
+    List<String> commands = new ArrayList<>();
     commands.add("ssh");
     // commands.add("-t");
     // commands.add ("-o StrictHostKeyChecking=no");
@@ -71,5 +71,18 @@ public class ProcessBuilderTests {
     String encodedString = Base64.getEncoder().encodeToString(salt);
     System.out.println(encodedString);
     Assert.notNull(encodedString);
+  }
+  
+  @Test
+  public void replaceStringTest()
+  {
+    String environment="dev";
+    String testString="hosts.env";
+    String inventoryFileName = testString.replaceAll("env", environment);
+    System.out.println(inventoryFileName);
+    String invFileName=inventoryFileName.substring(0,inventoryFileName.indexOf("."));
+    System.out.println(invFileName);
+   
+    
   }
 }

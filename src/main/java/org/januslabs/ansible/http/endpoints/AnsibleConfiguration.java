@@ -23,8 +23,8 @@ public class AnsibleConfiguration {
   private String inventoryName;
   @Value("${ansible.adhoc.cmd}")
   private String adhocName;
-  @Value("${ansible.upgrade_war.playbook.name}")
-  private String upgradeWarPlaybook;
+  @Value("${ansible.upgrade.playbook.name}")
+  private String upgradePlaybook;
   @Value("${ansible.restart.playbook.name}")
   private String bounceServerPlaybook;
   @Value("${ansible.status.playbook.name}")
