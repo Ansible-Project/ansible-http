@@ -15,6 +15,7 @@ import org.januslabs.ansible.http.endpoints.ExecutionStatus;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -26,9 +27,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment =WebEnvironment.RANDOM_PORT)
 public class AnsibleHttpApplicationTests {
 
@@ -38,7 +39,7 @@ public class AnsibleHttpApplicationTests {
   private String contextRoot;
   @Value("${spring.jersey.application-path}")
   private String jerseycontextRoot;
-  private TestRestTemplate restTemplate = new TestRestTemplate();
+  private @Autowired TestRestTemplate restTemplate;
 
 
   @Test
